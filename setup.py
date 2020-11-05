@@ -7,7 +7,6 @@ setup(
     name="easyfd",
     python_requires=">=3.6.0",
     version="0.0.1",
-    description="EFFD: Easier and Faster Face Detection",
     description="EasyFD: Easy Face Detection",
     author="enhuiz",
     author_email="niuzhe.nz@outlook.com",
