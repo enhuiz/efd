@@ -182,11 +182,11 @@ class S3FD(nn.Module):
         return next(self.parameters()).device
 
     @staticmethod
-    def decode(loc, priors, variances):
+    def decode(locations, priors, variances):
         """Decode locations from predictions using priors to undo
         the encoding we did for offset regression at train time.
         Args:
-            loc (tensor): location predictions for loc layers,
+            locations (tensor): location predictions for locations layers,
                 Shape: [num_priors, 4]
             priors (tensor): Prior boxes in center-offset form.
                 Shape: [num_priors, 4].
@@ -194,10 +194,10 @@ class S3FD(nn.Module):
         Return:
             decoded bounding box predictions
         """
-        boxes = torch.cat(
+        boxes = np.concatenate(
             [
-                priors[:, :2] + loc[:, :2] * variances[0] * priors[:, 2:],
-                priors[:, 2:] * torch.exp(loc[:, 2:] * variances[1]),
+                priors[:, :2] + locations[:, :2] * variances[0] * priors[:, 2:],
+                priors[:, 2:] * np.exp(locations[:, 2:] * variances[1]),
             ],
             axis=1,
         )
@@ -228,33 +228,36 @@ class S3FD(nn.Module):
         bbox_lists = []
         patch_iters = []
 
-        olist = [oelem.data.cpu() for oelem in olist]
+        olist = [oelem.cpu().numpy() for oelem in olist]
 
         for i in range(len(x)):
-            bbox_list = []
+            scores = []
+            priors = []
+            locations = []
             for j in range(0, len(olist), 2):
-                start_time = time.time()
                 ocls, oreg = olist[j], olist[j + 1]
                 stride = 2 ** (j // 2 + 2)  # 4, 8, 16, 32, 64, 128
                 possible = zip(*np.where(ocls[:, 1, :, :] > 0.05))
                 for _, hindex, windex in possible:
                     axc = stride / 2 + windex * stride
                     ayc = stride / 2 + hindex * stride
+                    scores.append([ocls[i, 1, hindex, windex]])
+                    priors.append([axc, ayc, stride * 4, stride * 4])
+                    locations.append(oreg[i, :, hindex, windex].flatten())
 
-                    score = ocls[i, 1, hindex, windex]
+            scores = np.array(scores)
+            priors = np.array(priors)
+            locations = np.array(locations)
+            variances = [0.1, 0.2]
 
-                    loc = oreg[i, :, hindex, windex].contiguous().view(1, 4)
-                    priors = torch.tensor([[axc, ayc, stride * 4, stride * 4]])
-                    variances = [0.1, 0.2]
+            bbox_list = self.decode(locations, priors, variances)
+            bbox_list /= scale_factor
 
-                    bbox = self.decode(loc, priors, variances)
+            bbox_list = np.concatenate((bbox_list, scores), axis=-1)
 
-                    x1, y1, x2, y2 = bbox[0] / scale_factor
-                    bbox_list.append([x1, y1, x2, y2, score])
-
-            bbox_list = np.array(bbox_list)
             bbox_list = bbox_list[nms(bbox_list, 0.3)]
             bbox_list = bbox_list[np.where(bbox_list[:, -1] > 0.5)]
+
             bbox_lists.append(bbox_list)
             patch_iters.append(self.crop_patches(imgs[i], bbox_list))
 
