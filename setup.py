@@ -6,7 +6,7 @@ with open("README.md", "r") as f:
 setup(
     name="easyfd",
     python_requires=">=3.6.0",
-    version="0.0.1",
+    version="0.0.1.dev0",
     description="EasyFD: Easy Face Detection",
     author="enhuiz",
     author_email="niuzhe.nz@outlook.com",
