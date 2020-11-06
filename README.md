@@ -62,3 +62,4 @@ This implementation is around 4.4x faster.
 ## Credits
 
 1. [face-alignment](https://github.com/1adrianb/face-alignment)
+2. [Example image](https://upload.wikimedia.org/wikipedia/commons/d/df/The_Fabs.JPG)
