@@ -31,8 +31,8 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-import time
 import numpy as np
+import pandas as pd
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -261,6 +261,9 @@ class S3FD(nn.Module):
             bbox_lists.append(bbox_list)
             patch_iters.append(self.crop_patches(imgs[i], bbox_list))
 
-        bbox_lists = np.array(bbox_lists)
+        bbox_lists = [
+            pd.DataFrame(bbox_list, columns=["x1", "y1", "x2", "y2", "score"])
+            for bbox_list in bbox_lists
+        ]
 
         return bbox_lists, patch_iters
