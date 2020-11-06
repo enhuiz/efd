@@ -52,10 +52,10 @@ for patch_iter in patch_iters:
 
 ## Comparison
 
-| commit                                                       | Time   |
-| ------------------------------------------------------------ | ------ |
-| git checkout 04eac0a (from face-alignment, pytorch decoding) | 5.8595 |
-| git checkout master (numpy based decoding)                   | 1.0739 |
+| commit                                                       | Time (s) |
+| ------------------------------------------------------------ | -------- |
+| git checkout 04eac0a (from face-alignment, pytorch decoding) | 5.8595   |
+| git checkout master (numpy based decoding)                   | 1.0739   |
 
 This implementation is around 5.5x faster.
 
