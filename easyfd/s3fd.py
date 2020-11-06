@@ -234,6 +234,7 @@ class S3FD(nn.Module):
             scores = []
             priors = []
             locations = []
+
             for j in range(0, len(olist), 2):
                 ocls, oreg = olist[j], olist[j + 1]
                 stride = 2 ** (j // 2 + 2)  # 4, 8, 16, 32, 64, 128
@@ -245,21 +246,22 @@ class S3FD(nn.Module):
                     priors.append([axc, ayc, stride * 4, stride * 4])
                     locations.append(oreg[i, :, h, w].flatten())
 
-            scores = np.array(scores)
-            priors = np.array(priors)
-            locations = np.array(locations)
-            variances = [0.1, 0.2]
+            if len(scores) > 0:
+                scores = np.array(scores)
+                priors = np.array(priors)
+                locations = np.array(locations)
+                variances = [0.1, 0.2]
 
-            bbox_list = self.decode(locations, priors, variances)
-            bbox_list /= scale_factor
+                bbox_list = self.decode(locations, priors, variances)
+                bbox_list /= scale_factor
 
-            bbox_list = np.concatenate((bbox_list, scores), axis=-1)
+                bbox_list = np.concatenate((bbox_list, scores), axis=-1)
 
-            bbox_list = bbox_list[nms(bbox_list, 0.3)]
-            bbox_list = bbox_list[np.where(bbox_list[:, -1] > 0.5)]
+                bbox_list = bbox_list[nms(bbox_list, 0.3)]
+                bbox_list = bbox_list[np.where(bbox_list[:, -1] > 0.5)]
 
-            bbox_lists.append(bbox_list)
-            patch_iters.append(self.crop_patches(imgs[i], bbox_list))
+                bbox_lists.append(bbox_list)
+                patch_iters.append(self.crop_patches(imgs[i], bbox_list))
 
         bbox_lists = [
             pd.DataFrame(bbox_list, columns=["x1", "y1", "x2", "y2", "score"])
