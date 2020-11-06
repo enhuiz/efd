@@ -259,12 +259,16 @@ class S3FD(nn.Module):
 
                 bbox_list = bbox_list[nms(bbox_list, 0.3)]
                 bbox_list = bbox_list[np.where(bbox_list[:, -1] > 0.5)]
+            else:
+                bbox_list = []
 
-                bbox_lists.append(bbox_list)
-                patch_iters.append(self.crop_patches(imgs[i], bbox_list))
+            bbox_lists.append(bbox_list)
+            patch_iters.append(self.crop_patches(imgs[i], bbox_list))
 
         bbox_lists = [
             pd.DataFrame(bbox_list, columns=["x1", "y1", "x2", "y2", "score"])
+            if len(bbox_list) > 0
+            else bbox_list
             for bbox_list in bbox_lists
         ]
 
