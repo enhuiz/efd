@@ -224,26 +224,25 @@ class S3FD(nn.Module):
         olist = self.forward(x * 255.0)
         for i in range(0, len(olist), 2):
             olist[i] = F.softmax(olist[i], dim=1)
+        olist = [oelem.cpu().numpy() for oelem in olist]
 
         bbox_lists = []
         patch_iters = []
 
-        olist = [oelem.cpu().numpy() for oelem in olist]
-
-        for i in range(len(x)):
+        for i in range(len(olist[0])):
             scores = []
             priors = []
             locations = []
             for j in range(0, len(olist), 2):
                 ocls, oreg = olist[j], olist[j + 1]
                 stride = 2 ** (j // 2 + 2)  # 4, 8, 16, 32, 64, 128
-                possible = zip(*np.where(ocls[:, 1, :, :] > 0.05))
-                for _, hindex, windex in possible:
-                    axc = stride / 2 + windex * stride
-                    ayc = stride / 2 + hindex * stride
-                    scores.append([ocls[i, 1, hindex, windex]])
+                possible = list(zip(*np.where(ocls[i, 1, :, :] > 0.05)))
+                for h, w in possible:
+                    axc = stride / 2 + w * stride
+                    ayc = stride / 2 + h * stride
+                    scores.append([ocls[i, 1, h, w]])
                     priors.append([axc, ayc, stride * 4, stride * 4])
-                    locations.append(oreg[i, :, hindex, windex].flatten())
+                    locations.append(oreg[i, :, h, w].flatten())
 
             scores = np.array(scores)
             priors = np.array(priors)

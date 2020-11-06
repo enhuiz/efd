@@ -4,7 +4,7 @@ This package is based on the [S3FD](https://openaccess.thecvf.com/content_ICCV_2
 
 ## Why not face-alignment?
 
-Face alignment is relatively heavy as it incorporate facial landmark detection, and I have encountered some performance issue when using the S3FD detector from face-alignment during decoding stage as they use PyTorch to implement it. To make thing faster and easier, I made this package for face detection only.
+Face alignment is relatively heavy as it incorporate facial landmark detection, and I have encountered some performance issue when using the S3FD detector from face-alignment during decoding stage due to the implementation. To make thing faster and easier, I made this package for face detection only and fix some performance problem of the original implementation of decoding.
 
 ## Installation
 
@@ -55,9 +55,11 @@ for patch_iter in patch_iters:
 | commit                                                       | Time   |
 | ------------------------------------------------------------ | ------ |
 | git checkout 04eac0a (from face-alignment, pytorch decoding) | 5.8595 |
-| git checkout master (numpy based decoding)                   | 1.3286 |
+| git checkout master (numpy based decoding)                   | 1.0739 |
 
-This implementation is around 4.4x faster.
+|
+
+This implementation is around 5.5x faster.
 
 ## Credits
 
