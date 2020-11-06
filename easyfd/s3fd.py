@@ -211,11 +211,12 @@ class S3FD(nn.Module):
             yield img[:, y1:y2, x1:x2]
 
     @torch.no_grad()
-    def detect(self, imgs, scale_factor=1):
+    def detect(self, imgs, scale_factor=1, threshold=0.05):
         """
         Args:
             imgs: (b c h w)
-            scale_factor: [0, 1]
+            scale_factor: [0, 1], network input scale
+            threshold: [0, 1], minimal probability for a detected bbox.
         """
         x = imgs.clone()
         x = x.to(self.device)
@@ -236,7 +237,7 @@ class S3FD(nn.Module):
             for j in range(0, len(olist), 2):
                 ocls, oreg = olist[j], olist[j + 1]
                 stride = 2 ** (j // 2 + 2)  # 4, 8, 16, 32, 64, 128
-                possible = list(zip(*np.where(ocls[i, 1, :, :] > 0.05)))
+                possible = list(zip(*np.where(ocls[i, 1, :, :] > threshold)))
                 for h, w in possible:
                     axc = stride / 2 + w * stride
                     ayc = stride / 2 + h * stride
