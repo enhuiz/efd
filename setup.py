@@ -16,6 +16,7 @@ setup(
     install_requires=[
         "torch",
         "numpy",
+        "pandas",
     ],
     url="https://github.com/enhuiz/easyfd",
 )
