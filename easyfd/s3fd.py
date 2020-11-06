@@ -31,6 +31,7 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
+import time
 import numpy as np
 import torch
 import torch.nn as nn
@@ -186,9 +187,9 @@ class S3FD(nn.Module):
         the encoding we did for offset regression at train time.
         Args:
             loc (tensor): location predictions for loc layers,
-                Shape: [num_priors,4]
+                Shape: [num_priors, 4]
             priors (tensor): Prior boxes in center-offset form.
-                Shape: [num_priors,4].
+                Shape: [num_priors, 4].
             variances: (list[float]) Variances of priorboxes
         Return:
             decoded bounding box predictions
@@ -198,32 +199,31 @@ class S3FD(nn.Module):
                 priors[:, :2] + loc[:, :2] * variances[0] * priors[:, 2:],
                 priors[:, 2:] * torch.exp(loc[:, 2:] * variances[1]),
             ],
-            dim=1,
+            axis=1,
         )
         boxes[:, :2] -= boxes[:, 2:] / 2
         boxes[:, 2:] += boxes[:, :2]
         return boxes
 
-    def crop_frame(self, frame, bboxs):
-        for bbox in bboxs:
+    def crop_patches(self, img, bbox_list):
+        for bbox in bbox_list:
             x1, y1, x2, y2 = map(int, np.clip(bbox[:4], 0, None))
-            yield frame[:, y1:y2, x1:x2]
+            yield img[:, y1:y2, x1:x2]
 
     @torch.no_grad()
-    def detect(self, frames, scale_factor=1):
+    def detect(self, imgs, scale_factor=1):
         """
         Args:
-            frames: (b c h w)
-        Returns:
-            iterator
+            imgs: (b c h w)
+            scale_factor: [0, 1]
         """
-        x = frames.clone()
+        x = imgs.clone()
         x = x.to(self.device)
         x = F.interpolate(x, scale_factor=scale_factor, recompute_scale_factor=False)
 
         olist = self.forward(x * 255.0)
-        for i in range(len(olist) // 2):
-            olist[i * 2] = F.softmax(olist[i * 2], dim=1)
+        for i in range(0, len(olist), 2):
+            olist[i] = F.softmax(olist[i], dim=1)
 
         bbox_lists = []
         patch_iters = []
@@ -232,12 +232,12 @@ class S3FD(nn.Module):
 
         for i in range(len(x)):
             bbox_list = []
-            for j in range(len(olist) // 2):
-                ocls, oreg = olist[j * 2], olist[j * 2 + 1]
-                stride = 2 ** (j + 2)  # 4,8,16,32,64,128
-                anchor = stride * 4
-                poss = zip(*np.where(ocls[:, 1, :, :] > 0.05))
-                for _, hindex, windex in poss:
+            for j in range(0, len(olist), 2):
+                start_time = time.time()
+                ocls, oreg = olist[j], olist[j + 1]
+                stride = 2 ** (j // 2 + 2)  # 4, 8, 16, 32, 64, 128
+                possible = zip(*np.where(ocls[:, 1, :, :] > 0.05))
+                for _, hindex, windex in possible:
                     axc = stride / 2 + windex * stride
                     ayc = stride / 2 + hindex * stride
 
@@ -256,7 +256,7 @@ class S3FD(nn.Module):
             bbox_list = bbox_list[nms(bbox_list, 0.3)]
             bbox_list = bbox_list[np.where(bbox_list[:, -1] > 0.5)]
             bbox_lists.append(bbox_list)
-            patch_iters.append(self.crop_frame(frames[i], bbox_list))
+            patch_iters.append(self.crop_patches(imgs[i], bbox_list))
 
         bbox_lists = np.array(bbox_lists)
 

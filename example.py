@@ -1,3 +1,4 @@
+import time
 import torch
 import matplotlib.pyplot as plt
 from PIL import Image
@@ -10,6 +11,9 @@ img = Image.open("./example.jpg")
 
 # 2. Use torchvision to transform it as tensor.
 img = transforms.ToTensor()(img)
+if img.shape[0] == 1:
+    # Gray => RGB
+    img = torch.repeat_interleave(img, 3, 0)
 imgs = torch.stack([img])
 
 # 3. Initialize the s3fd model.
@@ -19,7 +23,7 @@ model = model.cuda()
 # 4. Detect. The imgs feed to the model will be scaled by scale_factor.
 #    Smaller scale_factor make inference faster but less accurate.
 #    Notice that the patches are still cropped from the original image.
-bbox_lists, patch_iters = model.detect(imgs, scale_factor=0.2)
+bbox_lists, patch_iters = model.detect(imgs, scale_factor=0.5)
 
 # 5. Print & plot the results.
 print(bbox_lists)
