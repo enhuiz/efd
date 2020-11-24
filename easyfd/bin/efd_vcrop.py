@@ -5,12 +5,25 @@ import cv2
 import tqdm
 import torch
 from pathlib import Path
-from torchvision.utils import save_image
 from einops import rearrange
 from itertools import count
 from more_itertools import chunked
+from PIL import Image
 
 from easyfd import s3fd
+
+
+def save_image(tensor, path, **kwargs):
+    ndarr = (
+        tensor.mul(255)
+        .add_(0.5)
+        .clamp_(0, 255)
+        .permute(1, 2, 0)
+        .to("cpu", torch.uint8)
+        .numpy()
+    )
+    img = Image.fromarray(ndarr)
+    img.save(path, **kwargs)
 
 
 def read_frames(path):
@@ -63,7 +76,7 @@ def main():
                 outpath = outdir / f"{i:06d}.png"
                 try:
                     patch = next(patch_iter)
-                    save_image(patch, outpath)
+                    save_image(patch, outpath, optimize=True)
                 except:
                     print(
                         f"Warning: no face detected for {outpath}, "
