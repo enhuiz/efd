@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 with open("README.md", "r") as f:
     long_description = f.read()
@@ -12,11 +12,16 @@ setup(
     author_email="niuzhe.nz@outlook.com",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    packages=["easyfd"],
+    packages=find_packages(),
     install_requires=[
         "torch",
         "numpy",
         "pandas",
     ],
     url="https://github.com/enhuiz/easyfd",
+    entry_points={
+        "console_scripts": [
+            "efd-vcrop=easyfd.bin.video_crop:main",
+        ],
+    },
 )
