@@ -26,7 +26,7 @@ def read_frames(path):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Only support signle face.")
+    parser = argparse.ArgumentParser(description="Only support single face.")
     parser.add_argument("videos", type=Path, nargs="+")
     parser.add_argument("--batch-size", type=int, default=128)
     parser.add_argument("--scale-factor", type=float, default=1)
