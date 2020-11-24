@@ -21,7 +21,7 @@ setup(
     url="https://github.com/enhuiz/easyfd",
     entry_points={
         "console_scripts": [
-            "efd-vcrop=easyfd.bin.video_crop:main",
+            "efd-vcrop=easyfd.bin.efd_vcrop:main",
         ],
     },
 )
