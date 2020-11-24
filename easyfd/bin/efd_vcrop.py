@@ -73,10 +73,10 @@ def main():
             batch = torch.from_numpy(np.array(batch)).cuda()
             _, patch_iters = model.detect(batch, args.scale_factor)
             for i, patch_iter in zip(counter, patch_iters):
-                outpath = outdir / f"{i:06d}.png"
+                outpath = outdir / f"{i:06d}.jpg"
                 try:
                     patch = next(patch_iter)
-                    save_image(patch, outpath, optimize=True)
+                    save_image(patch, outpath, quality=95)
                 except:
                     print(
                         f"Warning: no face detected for {outpath}, "
