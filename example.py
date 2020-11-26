@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from PIL import Image
 from torchvision import transforms
 
-from easyfd import s3fd
+from efd import s3fd
 
 # 1. Open an image.
 img = Image.open("./example.jpg")

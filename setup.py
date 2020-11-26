@@ -4,7 +4,7 @@ with open("README.md", "r") as f:
     long_description = f.read()
 
 setup(
-    name="easyfd",
+    name="efd",
     python_requires=">=3.6.0",
     version="0.0.1.dev0",
     description="EasyFD: Easy Face Detection",
@@ -18,10 +18,10 @@ setup(
         "numpy",
         "pandas",
     ],
-    url="https://github.com/enhuiz/easyfd",
+    url="https://github.com/enhuiz/efd",
     entry_points={
         "console_scripts": [
-            "efd-vcrop=easyfd.bin.efd_vcrop:main",
+            "efd-vcrop=efd.bin.efd_vcrop:main",
         ],
     },
 )

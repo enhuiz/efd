@@ -10,7 +10,7 @@ from itertools import count
 from more_itertools import chunked
 from PIL import Image
 
-from easyfd import s3fd
+from efd import s3fd
 
 
 def save_image(tensor, path, **kwargs):
