@@ -9,7 +9,7 @@ Face alignment is relatively heavy as it incorporate facial landmark detection, 
 ## Installation
 
 ```
-pip install git+https://github.com/enhuiz/easyfd
+pip install git+https://github.com/enhuiz/efd
 ```
 
 ## Example
@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 from PIL import Image
 from torchvision import transforms
 
-from easyfd import s3fd
+from efd import s3fd
 
 # 1. Open an image.
 img = Image.open("./example.jpg")
