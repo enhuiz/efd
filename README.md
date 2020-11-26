@@ -1,4 +1,4 @@
-# EasyFD: **Easy** **F**ace **D**etection
+# EFD: **Easy** **F**ace **D**etection
 
 This package is based on the [S3FD](https://openaccess.thecvf.com/content_ICCV_2017/papers/Zhang_S3FD_Single_Shot_ICCV_2017_paper.pdf) implementation from [face-alignment](https://github.com/1adrianb/face-alignment).
 
